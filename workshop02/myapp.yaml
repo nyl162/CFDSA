@@ -6,3 +6,33 @@ metadata:
   name: myns
   labels:
     app: myapp
+
+---
+kind: Deployment
+apiVersion: apps/v1
+
+metadata:
+  name: mydb-deployment
+  labels:
+    app: mydb
+    version: v1
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mydb-pod
+      version: v1
+  template:
+    metadata:
+      name: mydb-pod
+      labels: 
+        app: mydb-pod
+        version: v1
+    spec:
+      containers:
+      - name: mydb
+        image: stackupiss/fortune:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3306
