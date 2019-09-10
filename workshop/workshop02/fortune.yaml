@@ -1,0 +1,29 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+
+metadata:
+  name: fortune-deployment
+  labels:
+    app: fortune
+    version: v1
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fortune-pod
+      version: v1
+  template:
+    metadata:
+      name: fortune-pod
+      labels: 
+        app: fortune-pod
+        version: v1
+    spec:
+      containers:
+      - name: fortune
+        image: stackupiss/fortune:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
