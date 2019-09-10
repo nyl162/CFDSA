@@ -26,4 +26,5 @@ spec:
         image: stackupiss/fortune:v1
         imagePullPolicy: Always
         ports:
-        - containerPort: 3000
+        - name: app-port
+          containerPort: 3000
