@@ -1,0 +1,9 @@
+---
+kind: PersistenceVolumeClaim
+apiVersion: v1
+
+metadata:
+  name: mydb-pvc
+  namespace: myns
+  labels:
+    name: mydb-pvc
