@@ -12,17 +12,17 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
 
 spec:
-  backend:
-    serviceName: mywtapp-svc
-    servicePort: 80
+#  backend:
+#    serviceName: mywtapp-svc
+#    servicePort: 80
   rules:
   - http: 
       paths:
-      - path: /customer(/|$)(.*) # replace /customer with /, $ => end of line : Capture for above
-        backend:
-          serviceName: myapp-svc
-          servicePort: 80
-      - path: / # replace /customer with /, $ => end of line : Capture for above
+#      - path: /customer(/|$)(.*) # replace /customer with /, $ => end of line : Capture for above
+#        backend:
+#          serviceName: myapp-svc
+#          servicePort: 80
+      - path: /(/|$)(.*) # replace /customer with /, $ => end of line : Capture for above
         backend:
           serviceName: mywtapp-svc
           servicePort: 80

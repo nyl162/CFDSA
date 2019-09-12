@@ -1,11 +1,19 @@
 ---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: weatherns
+  labels:
+    app: weather-app
+
+---
 kind: Secret
 apiVersion: v1
 metadata:
-  name: mywtapp-secret
-  namespace: myns
+  name: weather-secret
+  namespace: weatherns
   labels:
-    app: mywtapp-secret
+    app: weather-app
 
 data:
   app_id: MmZjMWZlZGIxYzcwYTFhNTUzOTk4MDkwYjVmOTc5MmI=
@@ -15,38 +23,59 @@ kind: Deployment
 apiVersion: apps/v1
 
 metadata:
-  name: mywtapp-deploy
-  namespace: myns
+  name: weather-deploy
+  namespace: weatherns
   labels:
-    app: mywtapp-deploy
+    app: weather-app
     version: v1
 
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: mywtapp-pod
-      version: v1
+      name: weather-pod
   template:
     metadata:
-      name: mywtapp-pod
+      name: weather-pod
       labels: 
-        app: mywtapp-pod
-        version: v1
+        app: weather-app
+        name: weather-pod
     spec:
       containers:
-      - name: mywtapp
+      - name: weather
         image: stackupiss/weather:v1
         imagePullPolicy: Always
         env:
         - name: APP_ID
           valueFrom: 
             secretKeyRef:
-              name: mywtapp-secret
+              name: weather-secret
               key: app_id
         ports:
-        - name: myapp-port
+        - name: weather-port
           containerPort: 3000
+        readinessProbe:
+          httpGet: 
+            path: /ready
+            port: weather-port
+          periodSeconds: 60
+        livenessProbe:
+          httpGet: 
+            path: /health
+            port: weather-port
+          periodSeconds: 60
+        resources:
+          requests:
+            cpu: 100m
+            memory: 16M
+          limits:
+#            cpu: 150m
+            memory: 128M
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
 
 ---
 #FQDN -> mydb-svc.myns.svc.cluster.local
@@ -54,16 +83,43 @@ kind: Service
 apiVersion: v1
 
 metadata:
-  name: mywtapp-svc
-  namespace: myns
+  name: weather-svc
+  namespace: weatherns
   labels:
-    app: mywtapp
+    app: weather-app
 
 spec:
   type: ClusterIP
   selector: 
-    app: mywtapp-pod
+    name: weather-pod
   ports:
-  - name: mywtapp-svc-port
-    port: 80
-    targetPort: myapp-port
+  - name: weather-port # optional
+    port: 3000
+    targetPort: weather-port
+
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+
+metadata:
+  name: weather-ing
+  namespace: weatherns
+  labels:
+    app: weather-app
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /$2 # use here
+#    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+
+spec:
+#  backend:
+#    serviceName: mywtapp-svc
+#    servicePort: 80
+  rules:
+
+  - host: weather.nyl162.tk
+    http: 
+      paths:
+      - path: /
+        backend:
+          serviceName: weather-svc
+          servicePort: weather-port
