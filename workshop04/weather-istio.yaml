@@ -1,0 +1,21 @@
+---
+kind: Gateway
+apiVersion: networking.istio.io/v1alpha3
+
+metadata:
+  name: weather-gw
+  namespace: weatherns
+  labels:
+    app: weather-app
+
+spec:
+  selector:
+    istio: ingressgateway
+
+  servers:
+  - port: 
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - '*'
